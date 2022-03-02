@@ -1,11 +1,10 @@
 'use strict';
 
 const AWS = require('aws-sdk');
-const middy = require('@middy/core');
-const httpJsonBodyParser = require('@middy/http-json-body-parser');
-const httEventNormalizer = require('@middy/http-event-normalizer');
-const httpErrorHandler = require('@middy/http-error-handler');
+const middy = require("@middy/core");
+const commonMiddleware = require('../lib/commonMiddleware');
 const createError = require('http-errors')
+
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
@@ -29,9 +28,6 @@ const getAuctions = async () => {
 
 };
 
-const handler = middy(getAuctions)
-    .use(httpJsonBodyParser())
-    .use(httEventNormalizer())
-    .use(httpErrorHandler())
+const handler = middy(getAuctions).use(commonMiddleware)
 
 module.exports = {handler}
