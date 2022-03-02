@@ -14,9 +14,17 @@ resources:
 
 functions:
   createAuction:
-    handler: src/handlers/createAuction.createAuction
+    handler: src/handlers/createAuction.handler
     events:
       - http:
           path: auction
           method: post
+          cors: true
+
+  getAuction:
+    handler: src/handlers/getAuction.handler
+    events:
+      - http:
+          path: auctions
+          method: get
           cors: true

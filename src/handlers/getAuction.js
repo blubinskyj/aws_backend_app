@@ -1,40 +1,35 @@
 'use strict';
 
-const uuid = require('uuid');
 const AWS = require('aws-sdk');
 const middy = require('@middy/core');
 const httpJsonBodyParser = require('@middy/http-json-body-parser');
 const httEventNormalizer = require('@middy/http-event-normalizer');
 const httpErrorHandler = require('@middy/http-error-handler');
+const createError = require('http-errors')
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-const createAuction = async (event) => {
+const getAuction = async () => {
+    let auctions;
 
-    const {title} = event.body;
+    try {
+        const result = await dynamodb.scan({TableName: 'AuctionsTable'}).promise();
+        auctions = result.Items;
 
-    const now = new Date();
-
-    const auction = {
-        id: uuid.v4(),
-        title,
-        status: 'OPEN',
-        createdAt: now.toISOString(),
-    };
-
-    await dynamodb.put({
-        TableName: 'AuctionsTable', Item: auction,
-    }).promise();
+    } catch (error) {
+        console.log(error);
+        throw new createError(500);
+    }
 
     return {
-        statusCode: 201, headers: {
+        statusCode: 200, headers: {
             'Access-Control-Allow-Origin': '*', // Required for CORS support to work
-        }, body: JSON.stringify(auction),
+        }, body: JSON.stringify(auctions),
     };
 
 };
 
-const handler = middy(createAuction)
+const handler = middy(getAuction)
     .use(httpJsonBodyParser())
     .use(httEventNormalizer())
     .use(httpErrorHandler())
