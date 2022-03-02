@@ -21,10 +21,18 @@ functions:
           method: post
           cors: true
 
+  getAuctions:
+    handler: src/handlers/getAuctions.handler
+    events:
+      - http:
+          path: auctions
+          method: get
+          cors: true
+
   getAuction:
     handler: src/handlers/getAuction.handler
     events:
       - http:
-          path: auctions
+          path: auction/{id}
           method: get
           cors: true
