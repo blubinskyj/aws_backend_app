@@ -36,3 +36,11 @@ functions:
           path: auction/{id}
           method: get
           cors: true
+
+  placeBid:
+    handler: src/handlers/placeBid.handler
+    events:
+      - http:
+          path: auction/{id}/bid
+          method: patch
+          cors: true

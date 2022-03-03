@@ -14,11 +14,18 @@ const createAuction = async (event) => {
     const now = new Date();
 
     const auction = {
-        id: uuid.v4(), title, status: 'OPEN', createdAt: now.toISOString(),
+        id: uuid.v4(),
+        title,
+        status: 'OPEN',
+        createdAt: now.toISOString(),
+        highestBid: {
+            amount: 0,
+        }
     };
 
     await dynamodb.put({
-        TableName: 'AuctionsTable', Item: auction,
+        TableName: 'AuctionsTable',
+        Item: auction,
     }).promise();
 
     return {
