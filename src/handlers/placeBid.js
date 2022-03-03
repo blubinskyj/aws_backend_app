@@ -10,6 +10,30 @@ const dynamodb = new AWS.DynamoDB.DocumentClient();
 const placeBid = async (event) => {
     const {id} = event.pathParameters;
     const {amount} = event.body;
+    let auction;
+
+    //TODO: It must be a function
+    try {
+        const result = await dynamodb.get({
+            TableName: 'AuctionsTable',
+            Key: {id},
+        }).promise();
+
+        auction = result.Item
+    } catch (error) {
+        console.log(error);
+        throw new createError(500);
+    }
+
+    if (!auction) {
+        throw new createError(404)
+    }
+
+    if (amount <= auction.highestBid.amount){
+        throw new createError(403)
+    }
+    //
+
 
     const params = {
         TableName: 'AuctionsTable',

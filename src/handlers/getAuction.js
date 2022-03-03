@@ -7,13 +7,16 @@ const createError = require('http-errors')
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
+
+
 const getAuction = async (event) => {
     let auction;
     const {id} = event.pathParameters;
 
     try {
         const result = await dynamodb.get({
-            TableName: 'AuctionsTable', Key: {id},
+            TableName: 'AuctionsTable',
+            Key: {id},
         }).promise();
 
         auction = result.Item
