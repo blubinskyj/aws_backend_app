@@ -44,3 +44,8 @@ functions:
           path: auction/{id}/bid
           method: patch
           cors: true
+
+  processAuctions:
+    handler: src/handlers/processAuctions.handler
+#    events:
+#      - schedule: rate(1 minute)
