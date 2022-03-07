@@ -29,8 +29,12 @@ const placeBid = async (event) => {
         throw new createError(404)
     }
 
+    if (auction.status !== 'OPEN'){
+        throw new createError(403, `You cannot bid on closed auction`)
+    }
+
     if (amount <= auction.highestBid.amount){
-        throw new createError(403)
+        throw new createError(403, `Your bid must be higher than ${auction.highestBid.amount}`)
     }
     //
 
