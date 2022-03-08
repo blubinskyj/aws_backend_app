@@ -2,6 +2,8 @@
 
 const AWS = require('aws-sdk');
 const middy = require("@middy/core");
+const validator = require('@middy/validator');
+const placeBidSchema = require('../lib/schemas/placeBidSchema')
 const commonMiddleware = require('../lib/commonMiddleware');
 const createError = require('http-errors')
 
@@ -67,5 +69,7 @@ const placeBid = async (event) => {
 
 };
 
-const handler = middy(placeBid).use(commonMiddleware)
+const handler = middy(placeBid)
+    .use(commonMiddleware)
+    .use(validator({inputSchema: placeBidSchema}));
 module.exports = {handler}
