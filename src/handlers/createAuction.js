@@ -3,6 +3,8 @@
 const uuid = require('uuid');
 const AWS = require('aws-sdk');
 const middy = require("@middy/core");
+const validator = require('@middy/validator');
+const createAuctionSchema = require('../lib/schemas/createAuctionSchema')
 const commonMiddleware = require('../lib/commonMiddleware');
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
@@ -38,5 +40,7 @@ const createAuction = async (event) => {
 
 };
 
-const handler = middy(createAuction).use(commonMiddleware)
+const handler = middy(createAuction)
+    .use(commonMiddleware)
+    .use(validator({inputSchema: createAuctionSchema}));
 module.exports = {handler}
