@@ -1,18 +1,34 @@
 'use strict';
 
 const AWS = require('aws-sdk');
-const middy = require("@middy/core");
+const middy = require('@middy/core');
 const commonMiddleware = require('../lib/commonMiddleware');
-const createError = require('http-errors')
-
+const validator = require('@middy/validator');
+const createError = require('http-errors');
+const getAuctionsSchema = require('../lib/schemas/getAuctiionsSchema')
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-const getAuctions = async () => {
+
+
+const getAuctions = async (event) => {
+    const { status } = event.queryStringParameters;
     let auctions;
 
+    const params = {
+        TableName: 'AuctionsTable',
+        IndexName: 'statusAndEndData',
+        KeyConditionExpression: '#status = :status',
+        ExpressionAttributeValues: {
+            ':status': status,
+        },
+        ExpressionAttributeNames: {
+            '#status': 'status',
+        },
+    };
+
     try {
-        const result = await dynamodb.scan({TableName: 'AuctionsTable'}).promise();
+        const result = await dynamodb.query(params).promise();
         auctions = result.Items;
 
     } catch (error) {
@@ -28,6 +44,11 @@ const getAuctions = async () => {
 
 };
 
-const handler = middy(getAuctions).use(commonMiddleware)
+const handler = middy(getAuctions)
+    .use(commonMiddleware)
+    .use(validator({
+        inputSchema: getAuctionsSchema,
+        useDefault: true,
+    }));
 
 module.exports = {handler}
