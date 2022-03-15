@@ -12,9 +12,11 @@ const dynamodb = new AWS.DynamoDB.DocumentClient();
 const placeBid = async (event) => {
     const {id} = event.pathParameters;
     const {amount} = event.body;
-    let auction;
+    const {email} = event.requestContext.authorizer;
 
     //TODO: It must be a function
+    let auction;
+
     try {
         const result = await dynamodb.get({
             TableName: 'AuctionsTable',
@@ -31,10 +33,22 @@ const placeBid = async (event) => {
         throw new createError(404)
     }
 
-    if (auction.status !== 'OPEN'){
-        throw new createError(403, `You cannot bid on closed auction`)
+    //Bid identity validation
+    if (email === auction.seller){
+        throw new createError(403, 'You can not dib on your own auctions!')
     }
 
+    //Avoid double bidding
+    if(email === auction.highestBid.bidder){
+        throw new createError(403 , 'You are already the highest bidder')
+    }
+
+    //Auction status validation
+    if (auction.status !== 'OPEN'){
+        throw new createError(403, 'You cannot bid on closed auction')
+    }
+
+    //Dib amount validation
     if (amount <= auction.highestBid.amount){
         throw new createError(403, `Your bid must be higher than ${auction.highestBid.amount}`)
     }
@@ -44,9 +58,10 @@ const placeBid = async (event) => {
     const params = {
         TableName: 'AuctionsTable',
         Key: {id},
-        UpdateExpression: 'set highestBid.amount = :amount',
+        UpdateExpression: 'set highestBid.amount = :amount, highestBid.bidder = :bidder',
         ExpressionAttributeValues: {
             ':amount': amount,
+            ':bidder': email,
         },
         ReturnValues: 'ALL_NEW',
     };
