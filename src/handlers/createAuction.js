@@ -9,9 +9,10 @@ const commonMiddleware = require('../lib/commonMiddleware');
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-const createAuction = async (event) => {
+const createAuction = async (event, context) => {
 
     const {title} = event.body;
+    const {email} = event.requestContext.authorizer;
     const now = new Date();
     const endDate = new Date();
     endDate.setHours(now.getHours() + 1)
@@ -24,7 +25,8 @@ const createAuction = async (event) => {
         endingAt: endDate.toISOString(),
         highestBid: {
             amount: 0,
-        }
+        },
+        seller: email,
     };
 
     await dynamodb.put({
