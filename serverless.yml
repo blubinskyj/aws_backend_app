@@ -5,8 +5,11 @@ service: aws-study
 provider:
   name: aws
   runtime: nodejs12.x
+  environment:
+    MAIL_QUEUE_URL: ${self:custom.MailQueue.url}
   iamRoleStatements:
     - ${file(iam/AuctionsTableIAM.yml):AuctionsTableIAM}
+    - ${file(iam/MailQueueIAM.yml):MailQueueIAM}
 
 resources:
   Resources:
@@ -54,3 +57,8 @@ functions:
     handler: src/handlers/processAuctions.handler
 #    events:
 #      - schedule: rate(1 minute)
+
+custom:
+  MailQueue:
+    arn: arn:aws:sqs:us-east-1:215112191743:MailQueue-dev
+    url: https://sqs.us-east-1.amazonaws.com/215112191743/MailQueue-dev
