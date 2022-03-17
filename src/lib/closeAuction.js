@@ -22,12 +22,24 @@ async function closeAuction(auction) {
     const { title, seller, highestBid } = auction;
     const { amount, bidder } = highestBid;
 
+    if(amount === 0){
+        await sqs.sendMessage({
+            QueueUrl: process.env.MAIL_QUEUE_URL,
+            MessageBody: JSON.stringify({
+                subject: 'No bids on your auction item!',
+                recipient: seller,
+                body: `Bad news. Your item "${title}" did not get any bits.`,
+            }),
+        }).promise();
+        return;
+    }
+
     const notifySeller = sqs.sendMessage({
         QueueUrl: process.env.MAIL_QUEUE_URL,
         MessageBody: JSON.stringify({
             subject: 'Your item has been sold!',
             recipient: seller,
-            body: `Congratulation! Your itme "${title}" has been sold for $${amount}.`,
+            body: `Congratulation! Your item "${title}" has been sold for $${amount}.`,
         }),
     }).promise();
 

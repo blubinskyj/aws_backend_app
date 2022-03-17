@@ -7,13 +7,17 @@ provider:
   runtime: nodejs12.x
   environment:
     MAIL_QUEUE_URL: ${self:custom.MailQueue.url}
+    AUCTIONS_BUCKET_NAME: ${self:custom.AuctionsBucket.name}
   iamRoleStatements:
     - ${file(iam/AuctionsTableIAM.yml):AuctionsTableIAM}
     - ${file(iam/MailQueueIAM.yml):MailQueueIAM}
+    - ${file(iam/AuctionsBucketIAM.yml):AuctionsBucketIAM}
 
 resources:
   Resources:
     AuctionsTable: ${file(resources/AuctionsTable.yml):AuctionsTable}
+    AuctionsBucket: ${file(resources/AuctionsBucket.yml):AuctionsBucket}
+    AuctionsBucketPolicy: ${file(resources/AuctionsBucket.yml):AuctionsBucketPolicy}
 
 functions:
   createAuction:
@@ -25,6 +29,7 @@ functions:
           cors: true
           authorizer:
             arn:aws:lambda:us-east-1:215112191743:function:auth-service-dev-auth
+
   getAuctions:
     handler: src/handlers/getAuctions.handler
     events:
@@ -58,7 +63,19 @@ functions:
 #    events:
 #      - schedule: rate(1 minute)
 
+  uploadAuctionPicture:
+    handler: src/handlers/uploadAuctionPicture.handler
+    events:
+      - http:
+          method: PATCH
+          path: auction/{id}/picture
+          cors: true
+          authorizer:
+            arn:aws:lambda:us-east-1:215112191743:function:auth-service-dev-auth
+
 custom:
   MailQueue:
     arn: arn:aws:sqs:us-east-1:215112191743:MailQueue-dev
     url: https://sqs.us-east-1.amazonaws.com/215112191743/MailQueue-dev
+  AuctionsBucket:
+    name: auctions-bucket-bogdan-lubinskyj-dev

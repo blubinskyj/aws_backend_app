@@ -3,9 +3,9 @@
 const AWS = require('aws-sdk');
 const middy = require("@middy/core");
 const validator = require('@middy/validator');
-const placeBidSchema = require('../lib/schemas/placeBidSchema')
+const placeBidSchema = require('../lib/schemas/placeBidSchema');
 const commonMiddleware = require('../lib/commonMiddleware');
-const createError = require('http-errors')
+const createError = require('http-errors');
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
@@ -32,6 +32,7 @@ const placeBid = async (event) => {
     if (!auction) {
         throw new createError(404)
     }
+    ///
 
     //Bid identity validation
     if (email === auction.seller){
@@ -52,7 +53,6 @@ const placeBid = async (event) => {
     if (amount <= auction.highestBid.amount){
         throw new createError(403, `Your bid must be higher than ${auction.highestBid.amount}`)
     }
-    //
 
 
     const params = {
